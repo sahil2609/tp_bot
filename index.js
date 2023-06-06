@@ -17,8 +17,6 @@ server.use(express.urlencoded({
 // See https://aka.ms/bot-services to learn more about the different parts of a bot.
 const { BotFrameworkAdapter } = require('botbuilder');
 
-const { AdaptiveCardActionsBot } = require('./bots/adaptivecardActionsBot');
-
 // Create adapter.
 // See https://aka.ms/about-bot-adapter to learn more about adapters.
 const adapter = new BotFrameworkAdapter({
@@ -31,7 +29,7 @@ adapter.onTurnError = async (context, error) => {
     // NOTE: In production environment, you should consider logging this to Azure
     //       application insights. See https://aka.ms/bottelemetry for telemetry 
     //       configuration instructions.
-    console.error(`\n [onTurnError] unhandled error: ${error}`);
+    // console.error(`\n [onTurnError] unhandled error: ${error}`);
 
     // Send a trace activity, which will be displayed in Bot Framework Emulator
     await context.sendTraceActivity(

@@ -7,7 +7,7 @@ const { ActionTypes } = require('botframework-schema');
 class SuggestedActionsBot extends ActivityHandler {
     constructor() {
         super();
-
+        let tp1 = null;
         this.onMembersAdded(async (context, next) => {
             await this.sendWelcomeMessage(context);
 
@@ -17,13 +17,30 @@ class SuggestedActionsBot extends ActivityHandler {
 
         this.onMessage(async (context, next) => {
             const text = context.activity.text;
-
-            if (text.includes("Card Actions")) {
+            if(text === undefined){
+                
+                const adaptiveCard = tp1.content;
+                adaptiveCard.actions = []
+                adaptiveCard.body = [
+                    {
+                        "type": "TextBlock",
+                        "text": "Message sent"
+                    }
+                ];
+                await context.sendActivity({ attachments: [tp1] });  
+                await context.deleteActivity(context.activity.replyToId);
+                // await context.sendActivity({ attachments: [tp1] });  
+                await context.sendActivity("You have successfully submitted your response.");
+                tp1 = null;
+            }
+            else if (text.includes("Card Actions")) {
                 const userCard = CardFactory.adaptiveCard(this.adaptiveCardActions());
+                tp1 = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else if (text.includes("Suggested Actions")) {
                 const userCard = CardFactory.adaptiveCard(this.SuggestedActionsCard());
+                tp1 = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else if (text.includes("Red") || text.includes("Blue") || text.includes("Yellow")) {
@@ -38,6 +55,7 @@ class SuggestedActionsBot extends ActivityHandler {
             }
             else if (text.includes("ToggleVisibility")) {
                 const userCard = CardFactory.adaptiveCard(this.ToggleVisibleCard());
+                tp1 = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else {
@@ -54,7 +72,6 @@ class SuggestedActionsBot extends ActivityHandler {
      */
     async sendWelcomeMessage(turnContext) {
         const { activity } = turnContext;
-
         // Iterate over all new members added to the conversation.
         for (const idx in activity.membersAdded) {
             if (activity.membersAdded[idx].id !== activity.recipient.id) {
@@ -97,6 +114,28 @@ class SuggestedActionsBot extends ActivityHandler {
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
         "version": "1.0",
+        // "body": [
+        //     {
+        //         "type": "TextBlock",
+        //         "text": "Present a form and submit it back to the originator"
+        //     },
+        //     {
+        //         "type": "Input.Text",
+        //         "id": "firstName",
+        //         "placeholder": "What is your first name?"
+        //     },
+        //     {
+        //         "type": "Input.Text",
+        //         "id": "lastName",
+        //         "placeholder": "What is your last name?"
+        //     }
+        // ],
+        // "actions": [
+        //     {
+        //         "type": "Action.Submit",
+        //         "title": "Action.Submit"
+        //     }
+        // ]
         "body": [
             {
                 "type": "TextBlock",
@@ -109,27 +148,33 @@ class SuggestedActionsBot extends ActivityHandler {
                 "title": "Action Open URL",
                 "url": "https://adaptivecards.io"
             },
+            
             {
                 "type": "Action.ShowCard",
-                "title": "Action Submit",
+                "title": "Reject",
                 "card": {
                     "type": "AdaptiveCard",
-                    "version": "1.5",
+                    "version": "1.3",
                     "body": [
                         {
                             "type": "Input.Text",
                             "id": "name",
                             "label": "Please enter your name:",
                             "isRequired": true,
-                            "errorMessage": "Name is required"
+                            "errorMessage": "Your Comment is rquired",
+                            "placeholder": "Type something..."
                         }
                     ],
                     "actions": [
                         {
                             "type": "Action.Submit",
-                            "title": "Submit"
-                        }
-                    ]
+                            "title": "Submit",
+                            "data": {
+                                "x": 13
+                            }
+                        },
+                    ],
+                    
                 }
             },
             {
