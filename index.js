@@ -13,10 +13,13 @@ server.use(express.urlencoded({
     extended: true
 }));
 
+
+const { MsTeamsApiRouter, MsTeamsPageRouter } = require('express-msteams-host')
+
 // Import required bot services.
 // See https://aka.ms/bot-services to learn more about the different parts of a bot.
 const { BotFrameworkAdapter } = require('botbuilder');
-
+const { TeamsInfo, DialogSet, TextPrompt } = require('botbuilder-dialogs');
 // Create adapter.
 // See https://aka.ms/about-bot-adapter to learn more about adapters.
 const adapter = new BotFrameworkAdapter({
@@ -34,7 +37,7 @@ adapter.onTurnError = async (context, error) => {
     // Send a trace activity, which will be displayed in Bot Framework Emulator
     await context.sendTraceActivity(
         'OnTurnError Trace',
-        `${error}`,
+        `${error}`, 
         'https://www.botframework.com/schemas/error',
         'TurnError'
     );
@@ -57,8 +60,18 @@ server.get('*', (req, res) => {
     res.json({ error: 'Route not found' });
 });
 
+
 server.post('/api/messages', (req, res) => {
+         
     adapter.processActivity(req, res, async (context) => {
-        await bot.run(context);
+        //console.log(context)
+            //console.log(context)
+
+            console.log(context.activity?.value)
+            await bot.run(context);
+        
     });
 });
+ 
+
+ 

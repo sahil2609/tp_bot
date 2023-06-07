@@ -1,0 +1,21 @@
+{
+    "type": "AdaptiveCard",
+    "body": [
+      {
+        "type": "TextBlock",
+        "text": "Example Adaptive Card"
+      }
+    ],
+    "actions": [
+      {
+        "type": "Action.Execute",
+        "title": "Open Task Module",
+        "verb": "task/fetch",
+        "data": {
+          "data": "your_custom_value"
+        }
+      }
+    ],
+    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+    "version": "1.3"
+  }

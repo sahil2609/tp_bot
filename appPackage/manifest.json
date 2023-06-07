@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.15/MicrosoftTeams.schema.json",
   "manifestVersion": "1.15",
   "version": "1.0.0",
-  "id": "b9b2a17f-5b4b-4816-a2fd-6b83f1c37c99",
+  "id": "c2bee7c2-fce7-4c3f-a52c-68981a5ab452",
   "packageName": "com.microsoft.teams.actions",
   "developer": {
     "name": "Microsoft",
@@ -25,15 +25,17 @@
   "accentColor": "#60A18E",
   "bots": [
     {
-      "botId": "b9b2a17f-5b4b-4816-a2fd-6b83f1c37c99",
+      "botId": "c2bee7c2-fce7-4c3f-a52c-68981a5ab452",
       "scopes": [
         "personal"
       ],
       "isNotificationOnly": false
+      
     }
   ],
   "validDomains": [
-    " c995-14-98-125-202.ngrok-free.app ",
+    "76db-106-79-194-146.in.ngrok.io",
+    "smba.trafficmanager.net",
     "*ngrok-free.app"
   ]
 }

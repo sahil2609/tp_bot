@@ -2,39 +2,63 @@
 // Licensed under the MIT License.
 
 const { ActivityHandler, MessageFactory, CardFactory } = require('botbuilder');
+const { TeamsActivityHandler } = require('botbuilder');
 const { ActionTypes } = require('botframework-schema');
+const  ACData =  require( "adaptivecards-templating");
+const templatePayload = require('./adaptiveCardSample.json')
+const { TeamsInfo, DialogSet, TextPrompt } = require('botbuilder-dialogs');
+var template = new ACData.Template(templatePayload);
+const aaa= require('./aaa.json')
+var cardData ={
 
-class SuggestedActionsBot extends ActivityHandler {
+    "title": "Publish Adaptive Card Schema",
+
+    "description": "Now that we have defined the main rules and features of the format, we need to produce a schema and publish it to GitHub. The schema will be the starting point of our reference documentation.",
+
+    "creator": {
+
+        "name": "Matt Hidinger",
+
+        "profileImage": "https://pbs.twimg.com/profile_images/3647943215/d7f12830b3c17a5a9e4afcc370e3a37e_400x400.jpeg"
+
+    },
+
+    "imageDescription":"https://pbs.twimg.com/profile_images/3647943215/d7f12830b3c17a5a9e4afcc370e3a37e_400x400.jpeg",
+
+    "createdUtc": "2017-02-14T06:08:39Z",
+
+    "requestId":"121234"
+
+}; 
+ 
+let func=(args)=>{
+    return template.expand({$root: args })
+}
+
+let idd=null;
+class SuggestedActionsBot extends TeamsActivityHandler {
     constructor() {
         super();
+        
         let tp1 = null;
         this.onMembersAdded(async (context, next) => {
             await this.sendWelcomeMessage(context);
-
             // By calling next() you ensure that the next BotHandler is run.
             await next();
         });
-
+     
         this.onMessage(async (context, next) => {
-            const text = context.activity.text;
-            if(text === undefined){
+            if (context.activity.type === 'invoke' && context.activity.name === 'task/fetch') {
+                const invokeResponse = await this.handleInvokeActivity(context.activity);
                 
-                const adaptiveCard = tp1.content;
-                adaptiveCard.actions = []
-                adaptiveCard.body = [
-                    {
-                        "type": "TextBlock",
-                        "text": "Message sent"
-                    }
-                ];
-                await context.sendActivity({ attachments: [tp1] });  
-                await context.deleteActivity(context.activity.replyToId);
-                // await context.sendActivity({ attachments: [tp1] });  
-                await context.sendActivity("You have successfully submitted your response.");
-                tp1 = null;
-            }
-            else if (text.includes("Card Actions")) {
-                const userCard = CardFactory.adaptiveCard(this.adaptiveCardActions());
+                // Set the invoke response in the turn state
+                context.turnState.set(botbuilder_core_1.INVOKE_RESPONSE_KEY, invokeResponse);
+               //await handleTeamsTaskModuleFetch(context);
+            } 
+            const text = context.activity.text;
+            
+            if (text.includes("Card Actions")) {
+                const userCard = CardFactory.adaptiveCard(func(cardData));
                 tp1 = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
@@ -62,9 +86,128 @@ class SuggestedActionsBot extends ActivityHandler {
                 await context.sendActivity("Please use one of these commands: **Card Actions** for  Adaptive Card Actions, **Suggested Actions** for Bot Suggested Actions and **ToggleVisibility** for Action ToggleVisible Card");
             }
             // By calling next() you ensure that the next BotHandler is run.
-            await next();
+             await next();
         });
+        
     }
+
+    
+
+    async handleTeamsTaskModuleFetch(context, taskModuleRequest) {
+        // Implementation of handleTeamsTaskModuleFetch method
+        // ...
+        console.log("hare hare")
+        console.log(context,"fetch")
+
+       
+        // Return the task module response
+        const adaptiveCard = {
+            "type": "AdaptiveCard",
+            "body": [
+                {
+                    "type": "TextBlock",
+                    "size": "Medium",
+                    "weight": "Bolder",
+                    "text": "Welcome"
+                },
+                {
+                    "type": "TextBlock",
+                    "text": "Description",
+                    "wrap": true
+                }
+            ],
+            "actions": [
+                {
+                    "type": "Action.ShowCard",
+                    "title": "Connect Your Sprinklr Account",
+                    "card": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "Input.Text",
+                                "id": "userId",
+                                "placeholder": "Enter User Id"
+                            },
+                            {
+                                "type": "Input.Text",
+                                "id": "password",
+                                "placeholder": "Enter Password"
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.Submit",
+                                "title": "Login"
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                    }
+                }
+            ],
+            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+            "version": "1.2"
+        };
+          
+          const adaptiveCardAttachment = CardFactory.adaptiveCard(adaptiveCard);
+          const card =CardFactory.adaptiveCard(func(adaptiveCard))
+          card.id=context.activity.replyToId;
+          const message = MessageFactory.attachment(card);
+          message.id = context.activity.replyToId;
+          idd=context.activity.replyToId;
+          console.log(idd)
+          const taskModuleResponse = {
+            task: {
+              type: 'continue',
+              value: {
+                card: adaptiveCardAttachment,
+                height: 'medium',
+                width: 'medium',
+                title: 'Pop-up Card'
+              }
+            }
+          };
+        await context.sendActivity({
+            type: 'invokeResponse',
+            value: {
+              status: 200,
+              body: taskModuleResponse
+            }
+          })
+          console.log(context.actions.replyToId)
+          await context.deleteActivity(context.actions.replyToId)
+        // return {
+        //     task: {
+        //         type: 'message',
+        //         value: {
+        //             title:" POp PoP",
+        //             card: popadpcard,
+        //             width:700,
+        //             height:1000
+        //         }
+        //     }
+        // };
+        
+    }
+    
+    async handleTeamsTaskModuleSubmit(context, taskModuleRequest) {
+        // Called when data is being returned from the selected option (see `handleTeamsTaskModuleFetch').
+    
+        // Echo the users input back.  In a production bot, this is where you'd add behavior in
+        // response to the input.
+        console.log(context,"submit")
+        await context.deleteActivity(idd)
+        await context.sendActivity('Submiteddddddddd');
+    
+        // Return TaskModuleResponse
+        return {
+            // TaskModuleMessageResponse
+            task: {
+                type: 'message',
+                value: 'Thanks!'
+            }
+        };
+    }
+
 
     /**
      * Send a welcome message along with suggested actions for the user to click.
@@ -108,110 +251,8 @@ class SuggestedActionsBot extends ActivityHandler {
         reply.suggestedActions = { "actions": cardActions, "to": [turnContext.activity.from.id] };
         await turnContext.sendActivity(reply);
     }
-
-    // Adaptive Card Actions
-    adaptiveCardActions = () => ({
-        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-        "type": "AdaptiveCard",
-        "version": "1.0",
-        // "body": [
-        //     {
-        //         "type": "TextBlock",
-        //         "text": "Present a form and submit it back to the originator"
-        //     },
-        //     {
-        //         "type": "Input.Text",
-        //         "id": "firstName",
-        //         "placeholder": "What is your first name?"
-        //     },
-        //     {
-        //         "type": "Input.Text",
-        //         "id": "lastName",
-        //         "placeholder": "What is your last name?"
-        //     }
-        // ],
-        // "actions": [
-        //     {
-        //         "type": "Action.Submit",
-        //         "title": "Action.Submit"
-        //     }
-        // ]
-        "body": [
-            {
-                "type": "TextBlock",
-                "text": "Adaptive Card Actions"
-            }
-        ],
-        "actions": [
-            {
-                "type": "Action.OpenUrl",
-                "title": "Action Open URL",
-                "url": "https://adaptivecards.io"
-            },
-            
-            {
-                "type": "Action.ShowCard",
-                "title": "Reject",
-                "card": {
-                    "type": "AdaptiveCard",
-                    "version": "1.3",
-                    "body": [
-                        {
-                            "type": "Input.Text",
-                            "id": "name",
-                            "label": "Please enter your name:",
-                            "isRequired": true,
-                            "errorMessage": "Your Comment is rquired",
-                            "placeholder": "Type something..."
-                        }
-                    ],
-                    "actions": [
-                        {
-                            "type": "Action.Submit",
-                            "title": "Submit",
-                            "data": {
-                                "x": 13
-                            }
-                        },
-                    ],
-                    
-                }
-            },
-            {
-                "type": "Action.ShowCard",
-                "title": "Action ShowCard",
-                "card": {
-                    "type": "AdaptiveCard",
-                    "version": "1.0",
-                    "body": [
-                        {
-                            "type": "TextBlock",
-                            "text": "This card's action will show another card"
-                        }
-                    ],
-                    "actions": [
-                        {
-                            "type": "Action.ShowCard",
-                            "title": "Action.ShowCard",
-                            "card": {
-                                "type": "AdaptiveCard",
-                                "body": [
-                                    {
-                                        "type": "TextBlock",
-                                        "text": "**Welcome To New Card**"
-                                    },
-                                    {
-                                        "type": "TextBlock",
-                                        "text": "This is your new card inside another card"
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                }
-            }
-        ]
-    });
+    adaptiveCard=()=>cardPayload;
+    
 
     // Toggle Visible Card
     ToggleVisibleCard = () => ({
