@@ -64,12 +64,7 @@ server.get('*', (req, res) => {
 server.post('/api/messages', (req, res) => {
          
     adapter.processActivity(req, res, async (context) => {
-        //console.log(context)
-            //console.log(context)
-
-            console.log(context.activity?.value)
             await bot.run(context);
-        
     });
 });
  

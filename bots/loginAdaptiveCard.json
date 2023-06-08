@@ -1,0 +1,38 @@
+{
+    "type": "AdaptiveCard",
+    "body": [
+        {
+            "type": "TextBlock",
+            "size": "Medium",
+            "weight": "Bolder",
+            "text": "Welcome"
+        },
+        {
+            "type": "TextBlock",
+            "text": "Description",
+            "wrap": true
+        }
+    ],
+    "actions": [
+        {
+            "type": "Action.Submit",
+            "title": "Connect Your Sprinklr Account",
+            "data": {
+
+                "action": "connect",
+
+                "requestId": "Akmfdsf",
+
+                "msteams": {
+                    "type": "invoke",
+                    "title": "Enter Your Name",
+                    "value": {
+                        "type":"task/fetch"
+                    }
+                }
+            }
+        }
+    ],
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "version": "1.2"
+}

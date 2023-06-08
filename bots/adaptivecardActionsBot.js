@@ -8,7 +8,8 @@ const  ACData =  require( "adaptivecards-templating");
 const templatePayload = require('./adaptiveCardSample.json')
 const { TeamsInfo, DialogSet, TextPrompt } = require('botbuilder-dialogs');
 var template = new ACData.Template(templatePayload);
-const aaa= require('./aaa.json')
+const loginAdaptiveCard = require('./loginAdaptiveCard.json');
+
 var cardData ={
 
     "title": "Publish Adaptive Card Schema",
@@ -48,23 +49,20 @@ class SuggestedActionsBot extends TeamsActivityHandler {
         });
      
         this.onMessage(async (context, next) => {
-            if (context.activity.type === 'invoke' && context.activity.name === 'task/fetch') {
-                const invokeResponse = await this.handleInvokeActivity(context.activity);
+            // if (context.activity.type === 'invoke' && context.activity.name === 'task/fetch') {
+            //     const invokeResponse = await this.handleInvokeActivity(context.activity);
                 
-                // Set the invoke response in the turn state
-                context.turnState.set(botbuilder_core_1.INVOKE_RESPONSE_KEY, invokeResponse);
-               //await handleTeamsTaskModuleFetch(context);
-            } 
+            //     // Set the invoke response in the turn state
+            //     context.turnState.set(botbuilder_core_1.INVOKE_RESPONSE_KEY, invokeResponse);
+            // } 
             const text = context.activity.text;
             
             if (text.includes("Card Actions")) {
                 const userCard = CardFactory.adaptiveCard(func(cardData));
-                tp1 = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else if (text.includes("Suggested Actions")) {
                 const userCard = CardFactory.adaptiveCard(this.SuggestedActionsCard());
-                tp1 = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else if (text.includes("Red") || text.includes("Blue") || text.includes("Yellow")) {
@@ -77,9 +75,8 @@ class SuggestedActionsBot extends TeamsActivityHandler {
                 }
                 await this.sendSuggestedActions(context);
             }
-            else if (text.includes("ToggleVisibility")) {
-                const userCard = CardFactory.adaptiveCard(this.ToggleVisibleCard());
-                tp1 = userCard
+            else if (text.includes("Login")) {
+                const userCard = CardFactory.adaptiveCard(loginAdaptiveCard);
                 await context.sendActivity({ attachments: [userCard] });
             }
             else {
@@ -97,11 +94,13 @@ class SuggestedActionsBot extends TeamsActivityHandler {
         // Implementation of handleTeamsTaskModuleFetch method
         // ...
         console.log("hare hare")
-        console.log(context,"fetch")
-
-       
-        // Return the task module response
-        const adaptiveCard = {
+        console.log(context.activity?.value,"fetch")
+        let adaptiveCard= {
+            "type":"AdaptiveCard",
+            "title":"Sorry, We ran into a problem"
+        }
+       if(context.activity?.value === "connect"){
+            adaptiveCard = {
             "type": "AdaptiveCard",
             "body": [
                 {
@@ -137,7 +136,10 @@ class SuggestedActionsBot extends TeamsActivityHandler {
                         "actions": [
                             {
                                 "type": "Action.Submit",
-                                "title": "Login"
+                                "title": "Login",
+                                "data":{
+                                    "action":"login"
+                                }
                             }
                         ],
                         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
@@ -147,6 +149,40 @@ class SuggestedActionsBot extends TeamsActivityHandler {
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "version": "1.2"
         };
+       }
+        // Return the task module response
+        
+        else {
+             adaptiveCard = {
+                "type": "AdaptiveCard",
+                "body": [
+                    {
+                        "type": "TextBlock",
+                        "size": "Medium",
+                        "weight": "Bolder",
+                        "text": "Welcome"
+                    },
+                    {
+                        "type": "TextBlock",
+                        "text": "Description",
+                        "wrap": true
+                    },
+                    {
+                        "type": "Input.Text",
+                        "id":"approvalResponse",
+                        "placeholder": "comment"
+                    }
+                ],
+                "actions": [
+                    {
+                        "type": "Action.Submit",
+                        "title": "Submit"
+                    }
+                ],
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "version": "1.2"
+            }
+        }
           
           const adaptiveCardAttachment = CardFactory.adaptiveCard(adaptiveCard);
           const card =CardFactory.adaptiveCard(func(adaptiveCard))
@@ -173,8 +209,10 @@ class SuggestedActionsBot extends TeamsActivityHandler {
               body: taskModuleResponse
             }
           })
-          console.log(context.actions.replyToId)
-          await context.deleteActivity(context.actions.replyToId)
+
+        
+        //   console.log(context.actions.replyToId)
+        //   await context.deleteActivity(context.actions.replyToId)
         // return {
         //     task: {
         //         type: 'message',
@@ -194,7 +232,7 @@ class SuggestedActionsBot extends TeamsActivityHandler {
     
         // Echo the users input back.  In a production bot, this is where you'd add behavior in
         // response to the input.
-        console.log(context,"submit")
+        console.log(context.activity?.value,"submit")
         await context.deleteActivity(idd)
         await context.sendActivity('Submiteddddddddd');
     
