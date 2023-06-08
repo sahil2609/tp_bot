@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content=
+        "width=device-width, 
+        initial-scale=1.0">
+
+    <script src="https://unpkg.com/adaptivecards/dist/adaptivecards.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/adaptivecards/dist/adaptivecards.js"></script>
+    <script src="https://adaptivecards.io/libs/adaptivecards/1.4/adaptivecards.js"></script>
+    <style>
+      body {
+        margin: 20px 30px;
+        max-width: 800px;
+        padding: 0 20px;
+      }
+
+      .container {
+        border: 2px solid #dedede;
+        background-color: #f1f1f1;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+
+      .darker {
+        border-color: #ccc;
+        background-color: #ddd;
+      }
+
+      .container::after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+      .time-left {
+        float: left;
+        color: #999;
+      }
+
+      a {
+        text-decoration: none;
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 4px;
+      }
+
+      a:hover {
+        background-color: #464EB8;
+        color: black;
+        cursor: pointer;
+      }
+
+      .previous {
+        background-color: #f1f1f1;
+        color: black;
+      }
+
+      .next {
+        background-color: #f1f1f1;
+        color: black;
+      }
+
+    </style>
+</head>
+  
+<body>
+
+
+  
+
+  <div id ="card-containers"></div>
+  <div id ="tp"></div>
+  <br><br>
+  <center>
+    <div id="pagination">
+      <a class="previous" id="prev-btn">&lt; Prev</a>
+      <a class="next" id="next-btn">Next &gt;</a>
+    </div>
+  </center>
+
+    <script>
+      let currentPage = 1;
+      const cardsPerPage = 3; 
+      let cards = `<%- JSON.stringify(notifications) %>`;
+      cards = JSON.parse(cards);
+      
+    
+      // Function to display the cards for the current page
+      function displayCards() {
+          const startIndex = (currentPage - 1) * cardsPerPage;
+          const endIndex = startIndex + cardsPerPage;
+          const currentCards = cards.slice(startIndex, endIndex);
+          const cardContainer = document.getElementById('card-containers');
+          cardContainer.innerHTML = '';
+          
+          currentCards.forEach((card) => {
+            const outerDiv = document.createElement('div');
+            outerDiv.classList.add("container")
+            outerDiv.classList.add("darker")
+            outerDiv.innerHTML = `<h2>${card.heading}</h2> 
+                                  <h3>${card.fromUser}</h3> 
+                                  <p>${card.body}</p>
+                                  <span class="time-left"> ${new Date(card.timestamp).toLocaleString()} </span>
+            
+            `;
+            const cardElement1 = document.createElement('h2');
+            // t1.innerText = "sahill"
+            cardElement1.classList.add('card');
+            cardElement1.innerText = card.heading;
+            cardContainer.appendChild(outerDiv);
+          });
+      }
+
+      
+        
+      displayCards();
+      
+      // Function to handle pagination navigation
+      function handlePaginationClick(event) {
+          if (event.target.id === 'prev-btn') {
+          if (currentPage > 1) {
+              currentPage--;
+              displayCards();
+          }
+          } else if (event.target.id === 'next-btn') {
+          const totalPages = Math.ceil(cards.length / cardsPerPage);
+          if (currentPage < totalPages) {
+              currentPage++;
+              displayCards();
+          }
+          }
+      }
+      
+      // Attach event listeners to pagination buttons
+      const prevButton = document.getElementById('prev-btn');
+      const nextButton = document.getElementById('next-btn');
+      prevButton.addEventListener('click', handlePaginationClick);
+      nextButton.addEventListener('click', handlePaginationClick);
+      
+    
+    </script>
+
+
+</body>
+  
+</html>

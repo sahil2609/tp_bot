@@ -33,7 +33,25 @@
     }
   ],
   "validDomains": [
-    " c995-14-98-125-202.ngrok-free.app ",
+    "a0b7-14-98-125-202.ngrok-free.app",
     "*ngrok-free.app"
+  ],
+  "staticTabs": [
+    {
+      "entityId": "tab1",
+      "name": "Adaptive Cards",
+      "contentUrl": "https://a0b7-14-98-125-202.ngrok-free.app/tab1",
+      "scopes": [
+        "personal"
+      ]
+    },
+    {
+      "entityId": "tab2",
+      "name": "Action Cards",
+      "contentUrl": "https://a0b7-14-98-125-202.ngrok-free.app/tab2",
+      "scopes": [
+        "personal"
+      ]
+    }
   ]
 }

@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-const { ActivityHandler, MessageFactory, CardFactory } = require('botbuilder');
+const { ActivityHandler, MessageFactory, CardFactory, TurnContext } = require('botbuilder');
 const { ActionTypes } = require('botframework-schema');
+const fs = require('fs');
+const ejs = require('ejs');
+// Read the EJS template file
+const template = fs.readFileSync("./views/index.ejs", 'utf8');
 
 class SuggestedActionsBot extends ActivityHandler {
     constructor() {
         super();
-        let tp1 = null;
+        let cardStore = null;
         this.onMembersAdded(async (context, next) => {
             await this.sendWelcomeMessage(context);
 
@@ -19,7 +20,7 @@ class SuggestedActionsBot extends ActivityHandler {
             const text = context.activity.text;
             if(text === undefined){
                 
-                const adaptiveCard = tp1.content;
+                const adaptiveCard = cardStore.content;
                 adaptiveCard.actions = []
                 adaptiveCard.body = [
                     {
@@ -27,20 +28,23 @@ class SuggestedActionsBot extends ActivityHandler {
                         "text": "Message sent"
                     }
                 ];
-                await context.sendActivity({ attachments: [tp1] });  
+                await context.sendActivity({ attachments: [cardStore] });  
                 await context.deleteActivity(context.activity.replyToId);
-                // await context.sendActivity({ attachments: [tp1] });  
-                await context.sendActivity("You have successfully submitted your response.");
-                tp1 = null;
+                cardStore = null;
             }
             else if (text.includes("Card Actions")) {
                 const userCard = CardFactory.adaptiveCard(this.adaptiveCardActions());
-                tp1 = userCard
+                cardStore = userCard;
+                // const renderedHtml = ejs.render(template, { adaptiveCard : this.adaptiveCardActions()}); 
+                // console.log(renderedHtml);
+                // res.send(renderedHtml);
+                // console.log("hi")
                 await context.sendActivity({ attachments: [userCard] });
             }
+            
             else if (text.includes("Suggested Actions")) {
                 const userCard = CardFactory.adaptiveCard(this.SuggestedActionsCard());
-                tp1 = userCard
+                cardStore = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else if (text.includes("Red") || text.includes("Blue") || text.includes("Yellow")) {
@@ -55,7 +59,7 @@ class SuggestedActionsBot extends ActivityHandler {
             }
             else if (text.includes("ToggleVisibility")) {
                 const userCard = CardFactory.adaptiveCard(this.ToggleVisibleCard());
-                tp1 = userCard
+                cardStore = userCard
                 await context.sendActivity({ attachments: [userCard] });
             }
             else {
@@ -114,28 +118,6 @@ class SuggestedActionsBot extends ActivityHandler {
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
         "version": "1.0",
-        // "body": [
-        //     {
-        //         "type": "TextBlock",
-        //         "text": "Present a form and submit it back to the originator"
-        //     },
-        //     {
-        //         "type": "Input.Text",
-        //         "id": "firstName",
-        //         "placeholder": "What is your first name?"
-        //     },
-        //     {
-        //         "type": "Input.Text",
-        //         "id": "lastName",
-        //         "placeholder": "What is your last name?"
-        //     }
-        // ],
-        // "actions": [
-        //     {
-        //         "type": "Action.Submit",
-        //         "title": "Action.Submit"
-        //     }
-        // ]
         "body": [
             {
                 "type": "TextBlock",
@@ -262,6 +244,7 @@ class SuggestedActionsBot extends ActivityHandler {
             }
         ]
     })
+
 }
 
 module.exports.SuggestedActionsBot = SuggestedActionsBot;
